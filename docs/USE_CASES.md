@@ -1,6 +1,6 @@
 # ORION use cases
 
-**ORION — Omni-modal Reasoning · Intelligent Orchestration Nexus.** A discipline layer you drop on top
+**ORION — Open Reasoning & Intelligent Orchestration Network.** A discipline layer you drop on top
 of any LLM so it researches before it answers, refuses to give up, and never fabricates. Built-in
 research + discipline functions, no vendor lock, frontier-grade behavior on any model.
 

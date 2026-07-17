@@ -1,6 +1,6 @@
 # ORION OS 🛰️ — the autonomous AI operating system that researches before it answers
 
-### ORION — **O**mni-modal **R**easoning · **I**ntelligent **O**rchestration **N**exus
+### ORION — **O**pen **R**easoning & **I**ntelligent **O**rchestration **N**etwork
 
 **A hardened, model-agnostic AI operating pattern you paste into any LLM.**
 
@@ -33,12 +33,27 @@ CAPTCHA, payment, account creation, destructive actions).
 
 Token-constrained? Use [`boot/ORION_CORE.md`](boot/ORION_CORE.md) (Tier 1 only, ~650 tok) instead.
 
+## Auto-wire your local coding agents
+
+If you use Claude Code / Codex / other AGENTS.md-aware agents, wire ORION in once and it loads every
+session automatically (Tier 1 core + auto Tier 2), token-efficiently:
+
+```bash
+git clone https://github.com/FutronPrime/orion-os && cd orion-os
+./install/orion-wire.sh            # wire everything present   (--status to check, --unwire to remove)
+```
+
+It's idempotent (marker-based, safe to re-run), self-refreshing, and only touches agents you actually
+have installed.
+
 ## What's inside
 
 | Path | What |
 |---|---|
 | `boot/ORION_CORE.md` | **Tier-1** lean core (~650 tokens) — put this in your persistent system-prompt slot |
 | `boot/ORION_BOOT.md` | **Tier-2** full boot (persona + gates + research forcing + commands) — paste once |
+| `install/orion-wire.sh` | One-command auto-wire into Claude Code / Codex / AGENTS.md agents |
+| `SETUP.md` | Tier-by-tier setup (Tier 1 & 2 automatic, Tier 3 situational) |
 | `docs/USE_CASES.md` | What ORION does + token-efficient deployment |
 | `skills/` | Optional add-on skill snippets you can append to the boot doc |
 | `examples/` | Sample sessions and deployment fills |
