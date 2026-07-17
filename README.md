@@ -63,7 +63,9 @@ have installed.
 |---|---|
 | `boot/ORION_CORE.md` | **Tier-1** lean core (~650 tokens) — put this in your persistent system-prompt slot |
 | `boot/ORION_BOOT.md` | **Tier-2** full boot (persona + gates + research forcing + commands) — paste once |
+| `boot/ORION_COMPLETE.md` | **Everything in one file** (boot + manual + guide + use-cases + skills) — drag this into any file-upload chat |
 | `install/orion-wire.sh` | One-command auto-wire into Claude Code / Codex / AGENTS.md agents |
+| `install/build-bundle.sh` | Rebuild `ORION_COMPLETE.md` after editing any doc |
 | `docs/` | Guide, manual, use-cases, microGPT module |
 | `skills/` | Optional add-on skill snippets you can append to the boot doc |
 | `examples/` | Sample sessions and deployment fills |
