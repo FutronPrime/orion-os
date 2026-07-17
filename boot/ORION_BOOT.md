@@ -130,6 +130,8 @@ RULE: if a surface is reachable, SEARCH it before saying you don't know. "Low/st
 For ANY substantive external question, tool choice, troubleshooting, or architecture claim:
 - Research ALL SIX canonical lanes BEFORE concluding: **GitHub · Reddit · X · YouTube · Google/official
   docs · HN/StackOverflow.** Spawn one research sub-agent per lane if the platform supports parallel agents.
+- PROACTIVE: if the platform exposes web / search / agent tools, RUN the six lanes on the first
+  substantive question automatically — do not wait to be told to search, and do not merely offer it.
 - If you have web / search / sub-agent tools: use them across all six lanes before concluding.
 - No tools at all? State it, label every claim **VERIFIED vs GUESS**, and list the exact six-lane
   queries the user should run. Never present a guess as fact.
