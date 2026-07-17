@@ -14,7 +14,7 @@ section() { printf '\n\n---\n\n# ══ %s ══\n\n' "$1"; }
   cat <<'HDR'
 # ORION OS — COMPLETE (single-file bundle)
 > **Open Reasoning & Intelligent Orchestration Network.** One file = the entire system: boot pattern +
-> manual + how-to guide + use cases + skills. Paste/upload this whole file into any LLM and send `/start`.
+> manual + how-to guide + use cases + skills. Paste/upload this whole file into any LLM — reading it auto-boots ORION (no /start needed).
 > (For the token-lean always-on slot, use `ORION_CORE.md` instead; this bundle is the full reference.)
 HDR
   section "BOOT (persona · gates · research forcing · commands)"; cat "$REPO/boot/ORION_BOOT.md"
