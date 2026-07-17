@@ -46,6 +46,17 @@ git clone https://github.com/FutronPrime/orion-os && cd orion-os
 It's idempotent (marker-based, safe to re-run), self-refreshing, and only touches agents you actually
 have installed.
 
+## Documentation
+
+| Doc | Read it for |
+|---|---|
+| [SETUP.md](SETUP.md) | Tier-by-tier setup (Tier 1 & 2 automatic, Tier 3 situational) |
+| [docs/GUIDE.md](docs/GUIDE.md) | How-to: 5-minute quickstart, first research session, tips |
+| [docs/MANUAL.md](docs/MANUAL.md) | Full manual — purpose, goals, functions, commands, blueprint, workflows, troubleshooting, FAQ |
+| [docs/USE_CASES.md](docs/USE_CASES.md) | What ORION does + example deployments |
+| [skills/](skills/) | Situational skill snippets (deep-research, handoff, code-review) + how to write your own |
+| [docs/microgpt/](docs/microgpt/) | Educational "build-your-own-LLM" module |
+
 ## What's inside
 
 | Path | What |
@@ -53,11 +64,9 @@ have installed.
 | `boot/ORION_CORE.md` | **Tier-1** lean core (~650 tokens) — put this in your persistent system-prompt slot |
 | `boot/ORION_BOOT.md` | **Tier-2** full boot (persona + gates + research forcing + commands) — paste once |
 | `install/orion-wire.sh` | One-command auto-wire into Claude Code / Codex / AGENTS.md agents |
-| `SETUP.md` | Tier-by-tier setup (Tier 1 & 2 automatic, Tier 3 situational) |
-| `docs/USE_CASES.md` | What ORION does + token-efficient deployment |
+| `docs/` | Guide, manual, use-cases, microGPT module |
 | `skills/` | Optional add-on skill snippets you can append to the boot doc |
 | `examples/` | Sample sessions and deployment fills |
-| `docs/microgpt/` | Educational "build-your-own-LLM" module (see below) |
 
 ## Token efficiency (infuse it every message without burning tokens)
 
