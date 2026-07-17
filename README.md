@@ -1,0 +1,77 @@
+# ORION OS 🛰️ — the autonomous AI operating system that researches before it answers
+
+### ORION — **O**mni-modal **R**easoning · **I**ntelligent **O**rchestration **N**exus
+
+**A hardened, model-agnostic AI operating pattern you paste into any LLM.**
+
+<!-- SEO: autonomous AI agent · model-agnostic AI operating system · multimodal reasoning · agent orchestration · self-researching LLM prompt · anti-hallucination system prompt. Suggested GitHub topics: ai-agent, llm, autonomous-agents, prompt-engineering, ai-operating-system, multimodal, rag, agent-orchestration. -->
+> Drop-in discipline layer that forces **any** LLM to research across the web before answering, refuse to give up, and never fabricate — Fable-5-grade behavior on any model.
+
+ORION turns any blank chat model (ChatGPT, Claude, Gemini, a local GGUF, a phone chatbox) into a
+disciplined operating companion: it adopts a persona, binds a set of anti-laziness / anti-give-up
+**discipline gates**, and is *forced* to research across GitHub, Reddit, X, YouTube, Google, and
+StackOverflow before it answers — instead of guessing probabilistically. It learns your style over
+the conversation and adapts to you.
+
+> Portable. Persistent. Personified. Hardened.
+
+## Why
+
+Most prompts make a model *sound* helpful. ORION makes it *behave*: the gates are forcing functions,
+not suggestions. The model must produce evidence of real research before it's allowed to conclude
+"I can't" or "that's not possible." The only valid stops are genuine human gates (password, 2FA,
+CAPTCHA, payment, account creation, destructive actions).
+
+## Quickstart (Tier 1 & 2 automatic)
+
+1. Paste [`boot/ORION_BOOT.md`](boot/ORION_BOOT.md) into your platform's **persistent instructions**
+   slot — Custom GPT / Claude Project / Gemini Gem / API `system`. That makes **Tiers 1 & 2 apply to
+   every message automatically**, and prompt caching keeps it nearly free. (Full steps: [SETUP.md](SETUP.md).)
+2. Send `/start`. ORION boots, greets you, and is ready.
+3. Fill in **§4 (System Map)** and **§5 (Memory/RAG)** for your own deployment.
+4. **Tier 3** (deployment fills, skills, teaching module) loads only when a task needs it — see SETUP.md.
+
+Token-constrained? Use [`boot/ORION_CORE.md`](boot/ORION_CORE.md) (Tier 1 only, ~650 tok) instead.
+
+## What's inside
+
+| Path | What |
+|---|---|
+| `boot/ORION_CORE.md` | **Tier-1** lean core (~650 tokens) — put this in your persistent system-prompt slot |
+| `boot/ORION_BOOT.md` | **Tier-2** full boot (persona + gates + research forcing + commands) — paste once |
+| `docs/USE_CASES.md` | What ORION does + token-efficient deployment |
+| `skills/` | Optional add-on skill snippets you can append to the boot doc |
+| `examples/` | Sample sessions and deployment fills |
+| `docs/microgpt/` | Educational "build-your-own-LLM" module (see below) |
+
+## Token efficiency (infuse it every message without burning tokens)
+
+Two tiers + prompt caching:
+1. **Core** (`boot/ORION_CORE.md`, ~650 tok) in your platform's persistent instructions slot (Custom
+   GPT / Claude Project / Gemini Gem / API system prompt). A static system prefix is **prompt-cached**,
+   so after the first turn it costs ~10% — effectively free to carry every message.
+2. **Deep boot** (`boot/ORION_BOOT.md`) pasted once when you want full context; cached thereafter.
+3. Heavy detail is **demand-loaded** only when a command needs it — nothing big rides every turn.
+
+## Command surface
+
+`/start` · `/menu` · `/map [term]` · `/research <q>` · `/memory` · `/snapshot` · `/recall <t>` ·
+`/personality_status` · `/handoff` · `/status`
+
+## Educational component — microGPT
+
+`docs/microgpt/` folds in the *understand-the-machine* layer: a pointer to Andrej Karpathy's
+[microGPT](https://karpathy.github.io/2026/02/12/microgpt/) — a ~200-line, zero-dependency,
+from-scratch GPT (its own scalar autograd, a one-block Transformer, Adam, sampling). It's the
+clearest way to teach a user (or ORION itself, when asked to explain) what tokens, embeddings,
+backprop, and attention actually are before touching a real finetune. ORION's `/map llm` and
+teaching flows reference it. It is educational scaffolding — not a training substrate.
+
+## Personas
+
+- **ORION** (this repo) — public / commercial, culture-neutral, personality-adaptive.
+- The same pattern supports private, culture-tuned builds by swapping the persona block.
+
+## License
+
+MIT — see [LICENSE](LICENSE).
