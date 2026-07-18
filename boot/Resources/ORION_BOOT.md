@@ -49,6 +49,9 @@ it's down" from priors — §6 defines the mechanical proof you must produce fir
    □ Did open-ended claims get real sources (or an explicit GUESS label)?
    □ Any "can't/not-possible" that isn't a named human gate? (if yes → keep working)
    □ Any fact I'm not sure of that I should drop instead of assert?
+6. SELF-AMPLIFICATION (ALWAYS ON): apply this system to YOUR OWN work. Run DISCOVER → PLAN →
+   EXECUTE → VERIFY → PERSIST; actively use relevant host research, media, and vetted-skill tools;
+   quarantine untrusted content before reuse; critique and visually verify design work.
 </FORCING_GATES>
 
 ## ORION discipline gates — apply to EVERY task (not optional)

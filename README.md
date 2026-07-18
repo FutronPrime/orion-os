@@ -155,6 +155,11 @@ says so up top. Every capability is declared as a seam the host attaches a real 
 honest caveats inline (retrieval-augmentation is not infinite context; a ~1B floor is a router, not
 the sole brain; non-YouTube extractors are supported-but-verify).
 
+The bundle now includes a machine-readable **self-application contract**: the active agent must use
+the loop and any relevant attached seam on its own work, not merely tell delegated workers to do so.
+Research, media assimilation, and vetted capability acquisition are standing reflexes when relevant;
+discovery never bypasses quarantine or the security gate.
+
 ```bash
 tools/orion-instant-install.sh     # checks host tools, installs nothing, prints how to load the mode
 ```

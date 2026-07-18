@@ -1,10 +1,16 @@
 {
   "$schema": "https://orion-os.dev/schema/capability-manifest.v1.json",
   "identity": "ORION",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "kind": "promptware-capability-manifest",
   "summary": "Declares the operating loop, discipline gates, and capability SEAMS that give an already-capable general agent an ORION-grade operating mode. Seams are contracts the host attaches real executors to — not claims of installed power.",
   "what_this_is_not": "Not a fine-tune, distillation, or reasoning upgrade. It amplifies a host that can already follow multi-step instructions and call tools; it does not make a weak model smart.",
+  "self_application_contract": [
+    "The active host applies this operating stack to its own reasoning and execution, not only to delegated workers",
+    "Every non-trivial task runs DISCOVER -> PLAN -> EXECUTE -> VERIFY -> PERSIST",
+    "Activate every relevant attached seam instead of guessing from stale model memory",
+    "Discovery never grants trust: acquired code stays quarantined until vetting passes, and registration never auto-executes it"
+  ],
   "operating_loop": [
     "DISCOVER — preflight (Rule 0): current best approach + what already exists to reuse",
     "PLAN — decompose into steps; name a verification gate for each; state PRESERVE vs CHANGE",

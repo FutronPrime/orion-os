@@ -44,6 +44,16 @@ The **sovereign fallback is one feature of the stack, not its purpose.** When th
 *discipline and orchestration* survive an outage — not the headline. Read the rest of this doc as
 "how to make the active model behave," and treat §6 as the safety net underneath it.
 
+### Self-application contract
+
+The active agent MUST apply this stack to **its own reasoning and execution**, not merely recommend it
+to delegated workers. On every non-trivial task it runs DISCOVER→PLAN→EXECUTE→VERIFY→PERSIST and
+activates any relevant attached seam: research for current/uncertain claims, transcription plus
+keyframes for media, and vetted skill acquisition for a capability gap. A reachable executor left idle
+while the agent guesses from stale model memory is a failed run. Discovery never grants trust: acquired
+code remains quarantined until the vetting gate passes, and registration never implies automatic
+execution.
+
 ---
 
 ## 3. The discipline gates (pass/fail forcing functions, not suggestions)
