@@ -21,17 +21,25 @@
 # Usage:
 #   orion-transcribe.sh <url|id> [--out FILE] [--ingest] [--ingest-db PATH] [--model base]
 #                        [--engines gemini,local-whisper] [--chunk-secs 600] [--lang en]
+#                        [--frames] [--scene 0.3] [--interval 30] [--max 60]
 #   orion-transcribe.sh --file urls.txt [--ingest --ingest-db ./transcripts.db]
-#   orion-transcribe.sh --local <audio_or_video_file> [--out FILE]
+#   orion-transcribe.sh --local <audio_or_video_file> [--out FILE] [--frames]
+#
+# --frames: after a transcript succeeds, extract VISUAL keyframes INLINE (self-contained;
+#   ffmpeg scene-change detection, yt-dlp <=720p fetch for remote sources). Frames land in
+#   `<id>-frames/` alongside the transcript with a frames.md index. Frame failure NEVER fails
+#   the transcript. Tune with --scene (scene-cut threshold, default 0.3), --interval (seconds
+#   for the fps fallback when <2 scene cuts, default 30), --max (max frames, default 60).
 #
 # Dependencies: yt-dlp, ffmpeg/ffprobe, and one of `whisper` (openai-whisper) or `mlx_whisper`.
-# Optional: `gemini` CLI, `transcribe-anything`, `aws` CLI.
+# Optional: `gemini` CLI, `transcribe-anything`, `aws` CLI. --frames uses only ffmpeg + yt-dlp.
 #
 # Exit 0 if a transcript was produced by ANY engine; 3 if every engine failed (with a diagnosis).
 set -uo pipefail
 
 WORK="${TMPDIR:-/tmp}/orion-transcribe.$$"
 MODEL="base"; CHUNK=600; LANG="en"; OUT=""; INGEST=0; INGEST_DB=""; LOCAL=""; FILE=""
+FRAMES=0; SCENE="0.3"; INTERVAL=30; FRAMESMAX=60; CUR_SRC=""
 ENGINES="gemini,ytdlp-subs,local-whisper,transcribe-anything,aws-transcribe"
 URLS=()
 
@@ -49,7 +57,11 @@ while [ $# -gt 0 ]; do case "$1" in
   --lang) LANG="$2"; shift 2;;
   --local) LOCAL="$2"; shift 2;;
   --file) FILE="$2"; shift 2;;
-  -h|--help) sed -n '2,35p' "$0"; exit 0;;
+  --frames) FRAMES=1; shift;;
+  --scene) SCENE="$2"; shift 2;;
+  --interval) INTERVAL="$2"; shift 2;;
+  --max) FRAMESMAX="$2"; shift 2;;
+  -h|--help) sed -n '2,41p' "$0"; exit 0;;
   *) URLS+=("$1"); shift;;
 esac; done
 
@@ -158,9 +170,56 @@ engine_aws(){ # url outfile
   return 1
 }
 
+# --- INLINE visual keyframe extraction (--frames; self-contained: ffmpeg + yt-dlp only) ---
+# Runs AFTER a transcript succeeds. Never fails the transcript: every error path returns 0.
+extract_frames(){ # src id transcript_file
+  local src="$1" id="$2" tfile="$3" video=""
+  command -v ffmpeg >/dev/null 2>&1 || { log "frames: no ffmpeg; keyframes skipped (transcript OK)"; return 0; }
+  if [ -f "$src" ]; then
+    video="$src"
+  else
+    command -v yt-dlp >/dev/null 2>&1 || { log "frames: no yt-dlp for remote source; keyframes skipped (transcript OK)"; return 0; }
+    video="$WORK/${id}-video.mp4"
+    if [ ! -s "$video" ]; then
+      log "frames: fetching video (yt-dlp <=720p mp4)…"
+      yt-dlp -q --no-warnings -f "bestvideo[height<=720][ext=mp4]/best[height<=720]/best" \
+        -o "$video" "$src" 2>>"$WORK/frames-yt.err" \
+        || { log "frames: video fetch failed ($(tail -1 "$WORK/frames-yt.err" 2>/dev/null)); keyframes skipped (transcript OK)"; return 0; }
+    fi
+  fi
+  [ -s "$video" ] || { log "frames: no video available; keyframes skipped (transcript OK)"; return 0; }
+  local outdir; outdir="$(dirname "$tfile")/${id}-frames"; mkdir -p "$outdir"
+  log "frames: scene-detect (scene>$SCENE, max $FRAMESMAX) -> $outdir"
+  ffmpeg -v error -i "$video" -vf "select='gt(scene,$SCENE)',showinfo" -vsync vfr \
+    -frames:v "$FRAMESMAX" "$outdir/frame-%04d.jpg" 2>>"$WORK/frames-ff.err" || true
+  local cnt; cnt=$(find "$outdir" -name 'frame-*.jpg' 2>/dev/null | wc -l | tr -d ' '); cnt=${cnt:-0}
+  if [ "$cnt" -lt 2 ]; then
+    log "frames: scene-detect yielded $cnt; falling back to interval (1 frame / ${INTERVAL}s)"
+    rm -f "$outdir"/frame-*.jpg 2>/dev/null
+    ffmpeg -v error -i "$video" -vf "fps=1/$INTERVAL" -frames:v "$FRAMESMAX" \
+      "$outdir/frame-%04d.jpg" 2>>"$WORK/frames-ff.err" || true
+    cnt=$(find "$outdir" -name 'frame-*.jpg' 2>/dev/null | wc -l | tr -d ' '); cnt=${cnt:-0}
+  fi
+  { # frames.md index (self-contained, relative image links)
+    printf '# Keyframes — %s\n\n' "$id"
+    printf -- '- Source: `%s`\n' "$src"
+    printf -- '- Transcript: `%s`\n' "$tfile"
+    printf -- '- Frames extracted: %s\n' "$cnt"
+    printf -- '- Method: ffmpeg scene-change (scene>%s); interval fallback 1/%ss; max %s\n\n' "$SCENE" "$INTERVAL" "$FRAMESMAX"
+    local fr
+    for fr in "$outdir"/frame-*.jpg; do
+      [ -e "$fr" ] || continue
+      printf -- '- ![%s](%s)\n' "$(basename "$fr")" "$(basename "$fr")"
+    done
+  } > "$outdir/frames.md" 2>/dev/null || true
+  log "frames: done ($cnt frame(s) -> $outdir)"
+  return 0
+}
+
 # --- orchestrate ONE source through the cascade ---
 run_one(){
   local src="$1" id title outfile
+  CUR_SRC="$src"
   id="$(vid "$src")"; [ -n "$id" ] || id="item"
   outfile="${OUT:-$WORK/$id.txt}"
   title="video $id"
@@ -201,6 +260,7 @@ finish(){ # id title outfile
   local id="$1" title="$2" f="$3"
   log "SUCCESS: $id -> $f ($(wc -c <"$f" 2>/dev/null) bytes)"
   ingest_db "$id" "$title" "$f"
+  [ "$FRAMES" = 1 ] && extract_frames "$CUR_SRC" "$id" "$f"
   printf '%s\t%s\n' "$id" "$f"
 }
 

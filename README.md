@@ -64,6 +64,12 @@ yt-dlp captions hit HTTP 429 and don't exist for many live VODs, and cloud quota
 4. **transcribe-anything** — optional pip engine (insanely-fast-whisper), auto-installed on demand
 5. **aws-transcribe** — optional cloud last resort (needs `AWS_TRANSCRIBE_BUCKET` + AWS creds)
 
+Add `--frames` to extract scene-change keyframes for full visual context: after a transcript
+succeeds, it fetches the video (yt-dlp, ≤720p) and runs ffmpeg scene detection into an
+`<id>-frames/` folder (with a `frames.md` index) next to the transcript — tune with `--scene`,
+`--interval`, and `--max`. It's fully self-contained (ffmpeg + yt-dlp only) and a frame-extraction
+failure never fails the transcript.
+
 Exit `0` if any engine produced a transcript; `3` if every engine failed (with a diagnosis pointing
 at the per-engine error logs).
 
