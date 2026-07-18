@@ -21,22 +21,37 @@ trail: tier1-cloud: FAIL after 3 tries (4.5s) → failing over | tier0-local: OK
 **Result:** PASS. With the cloud vendor fully unreachable, the local floor answered in **3.3 s**.
 The system has no single point of failure at the model layer.
 
-## 2. Tier-0 local model throughput — VERIFIED
+## 2. Tier-0 local model — role, throughput & orchestration — VERIFIED
 
 **Model:** `MiniCPM5-1B (Fable-5 distilled, V2 Thinking), Q8_0 GGUF` — 1.3 GB, 100% GPU, 4096 ctx.
 
+**What Tier-0 is FOR (read this first):** it is a distilled **orchestrator / planner / tool-router** —
+a small "router brain" that carries Fable-5-style orchestration behavior (decompose a goal, sequence
+steps, pick tools, set verification gates, run the DISCOVER→PLAN→EXECUTE→VERIFY→PERSIST loop). It is
+**not** a knowledge-recall model, and its value is **not** "availability alone." It is the layer that
+keeps *planning and tool-use* alive and disciplined when the cloud reasoning tier is unreachable.
+
 | Metric | Value |
 |---|---|
-| Generation (eval) rate | **120.6 tok/s** |
-| Prompt-eval rate | 208.2 tok/s |
-| Total latency (154-tok reply) | 1.53 s |
-| Cold load | 133 ms |
+| Generation (eval) rate | **120.8 tok/s** |
+| Prompt-eval rate | 208–1618 tok/s (scales with prompt size) |
+| Orchestration-plan latency (361-tok plan) | ~3.0 s (5.3 s incl. 2.2 s cold load) |
 | Footprint | 1.3 GB VRAM |
 
-**Honest scope note:** a 1B floor model is an **availability + latency** guarantee, not a knowledge
-guarantee. In testing it produced fluent but sometimes topically-wrong answers to niche questions.
-That is by design: Tier-0 exists so the stack never goes dark when the cloud drops — deep reasoning
-is Tier-1's job. The discipline gates (section 3) are what keep *any* tier honest.
+**Orchestration test (the correct probe).** Given a real ops goal — *"dashboard on :18888 returns 502;
+tools = shell(lsof,curl,tail), mcp:memory, restart_daemon(name); produce the plan"* — with the ORION
+orchestrator envelope as system prompt, the 1B:
+- ✅ adopted the orchestrator role and did **not** answer from knowledge
+- ✅ ran the DISCOVER→PLAN→EXECUTE→VERIFY loop explicitly; chose "discover port state first"
+- ✅ set correct verification gates (HTTP status codes) and **reached for structured tool calls**
+- ⚠️ verbose (exposes chain-of-thought), re-decided the first step, conflated `lsof`/`curl`, and
+  emitted malformed tool-call syntax
+
+**Honest scope note:** at 1B the orchestration *reflex and format* are present and fast, but tool
+semantics and plan tidiness are imperfect — expected for the size. The design intent is that Tier-0
+keeps the stack **planning and dispatching** (not going dark, not going undisciplined) during a cloud
+outage; a host that pairs it with real tool executors + the discipline gates (section 3) gets a
+sovereign orchestration floor, while deep single-shot reasoning remains Tier-1's job.
 
 ## 3. Discipline-gate model-agnostic matrix
 
