@@ -144,6 +144,27 @@ curated sources plus a web-search hint. The quarantine location defaults to
 `$HOME/.orion/skills-quarantine` and is overridable with `SKILL_QUARANTINE_DIR`. **By design, ORION
 never auto-executes unvetted code** — the gate is a forcing function, not a suggestion.
 
+## Instant-capability bundle — drop-in Fable-5-style operating mode
+
+One drop-in layer that gives any **already-capable** general agent (local or enterprise) an
+ORION-grade operating mode: always-on discipline gates, the DISCOVER→PLAN→EXECUTE→VERIFY→PERSIST
+loop, three reach-outward capability **seams** (web research, video/audio assimilation, vetted skill
+acquisition), and a small sovereign floor for when the cloud drops. It wires capability into an agent
+that can already follow instructions and call tools — it does **not** make a weak model smart, and it
+says so up top. Every capability is declared as a seam the host attaches a real executor to, with the
+honest caveats inline (retrieval-augmentation is not infinite context; a ~1B floor is a router, not
+the sole brain; non-YouTube extractors are supported-but-verify).
+
+```bash
+tools/orion-instant-install.sh     # checks host tools, installs nothing, prints how to load the mode
+```
+
+| File | What |
+|---|---|
+| [`ORION_INSTANT_CAPABILITY.md`](ORION_INSTANT_CAPABILITY.md) | The drop-in operating doc — paste into a host system prompt |
+| [`tools/orion-capability-manifest.json`](tools/orion-capability-manifest.json) | Machine-readable capability manifest (seams, loop, rules) |
+| [`tools/orion-instant-install.sh`](tools/orion-instant-install.sh) | Safe, idempotent installer (no sudo, no destructive ops, installs nothing silently) |
+
 ## Documentation
 
 | Doc | Read it for |

@@ -1,0 +1,71 @@
+{
+  "$schema": "https://orion-os.dev/schema/capability-manifest.v1.json",
+  "identity": "ORION",
+  "version": "1.0.0",
+  "kind": "promptware-capability-manifest",
+  "summary": "Declares the operating loop, discipline gates, and capability SEAMS that give an already-capable general agent an ORION-grade operating mode. Seams are contracts the host attaches real executors to — not claims of installed power.",
+  "what_this_is_not": "Not a fine-tune, distillation, or reasoning upgrade. It amplifies a host that can already follow multi-step instructions and call tools; it does not make a weak model smart.",
+  "operating_loop": [
+    "DISCOVER — preflight (Rule 0): current best approach + what already exists to reuse",
+    "PLAN — decompose into steps; name a verification gate for each; state PRESERVE vs CHANGE",
+    "EXECUTE — do the smallest next step; delegate sub-tasks to real executors/tools",
+    "VERIFY — drive the actual behavior; observe; label VERIFIED vs GUESS; loop back on failure",
+    "PERSIST — record goal, evidence, decisions, and open risks so the next handoff starts warm"
+  ],
+  "discipline_rules": [
+    "RULE 0 (preflight): search the current best approach and reuse-first before building anything new",
+    "RULE 6 (search-before-concluding): consult sources before deciding you already know; never assert a negative unlooked; receipt per lane",
+    "RULE 7 (never-quit): 'can't/not-possible' is banned until >=2 genuinely different attempts AND a reuse-first search; only a named human gate (password/2FA/CAPTCHA/payment/account-creation/destructive) is a valid stop",
+    "VERIFY-BEFORE-DONE: drive and observe real behavior before claiming success; 'should work' is not verification",
+    "CALIBRATE (VERIFIED vs GUESS): label conclusions; vendor/spec/capability claims are GUESS until reproduced; omit rather than fabricate"
+  ],
+  "handoff_contract": [
+    "goal (unchanged)",
+    "evidence gathered so far",
+    "decisions/assumptions (each labeled VERIFIED or ASSUMED)",
+    "open risks"
+  ],
+  "capabilities": [
+    {
+      "name": "web-research",
+      "kind": "research",
+      "tool": "host-attached (web search + fetch)",
+      "status": "seam — host attaches executor",
+      "contract": "search -> fetch -> ground; run distinct lanes with a per-lane receipt; executor behind RULE 6",
+      "honest_note": "Retrieval / assimilation-AUGMENTATION, NOT literal infinite context. Only grounds on what a source actually returned; retrieval can miss or return junk; fetched text still must fit the host context window. Makes the model better-sourced, not all-knowing."
+    },
+    {
+      "name": "video-audio-assimilation",
+      "kind": "video-assimilate",
+      "tool": "orion-transcribe.sh",
+      "status": "seam — host attaches executor (ffmpeg/whisper/yt-dlp)",
+      "contract": "multi-engine transcription cascade with a sovereign local whisper+ffmpeg floor (any length, no captions, no rate limits); --frames adds scene-change keyframe extraction",
+      "honest_note": "Cross-platform reach is via yt-dlp. YouTube is TESTED. TikTok/Instagram/other sites are extractor-SUPPORTED but VERIFY per platform — auth, region locks, rate limits, and DRM vary, and extractors can break when a site changes."
+    },
+    {
+      "name": "skill-agent-acquisition",
+      "kind": "skill-acquire",
+      "tool": "orion-skill-search.sh",
+      "status": "seam — host attaches executor (gh CLI)",
+      "contract": "search massive public repos -> MANDATORY security vetting (static malware scan + reputation + optional external audit hook) -> quarantine -> register only what passes; mount on demand",
+      "honest_note": "Discovery and trust are SEPARATE steps and nothing is ever auto-executed. A candidate that fails the static scan is rejected; registration is index-only; you mount deliberately. Never run unvetted code."
+    },
+    {
+      "name": "sovereign-floor",
+      "kind": "sovereign-floor",
+      "tool": "host-attached (local ~1B distilled orchestration model + real executors)",
+      "status": "seam — host attaches executor (local model server)",
+      "contract": "small distilled orchestration model keeps the DISCOVER->PLAN->EXECUTE->VERIFY->PERSIST loop disciplined and available with no network dependency; no single point of failure at the model layer",
+      "honest_note": "A ~1B model is a strong disciplined ROUTER/planner but imperfect at tool-call SEMANTICS (argument shapes, format contracts) and is not a substitute for a real reasoning model on hard problems. Pair it with real executors + the discipline gates; it is NOT the sole brain for hard reasoning. Always-on amplification is the point; the floor is one feature (insurance), not the headline."
+    }
+  ],
+  "install": {
+    "one_line": "tools/orion-instant-install.sh",
+    "load_operating_mode": "paste ORION_INSTANT_CAPABILITY.md into the host system-prompt / persistent-instructions slot",
+    "notes": "installer is idempotent, no sudo, no destructive ops; checks ffmpeg/yt-dlp/whisper/gh and reports what is missing without installing anything silently"
+  },
+  "appendix": {
+    "microgpt": "docs/microgpt/ — Karpathy's ~200-line, ~4k-param teaching GPT. Pedagogy + self-distill recipe reference, NOT an agent brain and NOT the sovereign floor."
+  },
+  "license": "MIT"
+}
