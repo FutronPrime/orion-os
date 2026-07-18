@@ -46,6 +46,49 @@ git clone https://github.com/FutronPrime/orion-os && cd orion-os
 It's idempotent (marker-based, safe to re-run), self-refreshing, and only touches agents you actually
 have installed.
 
+## Transcription cascade — never fail to assimilate a video
+
+No single transcriber wins every case: hosted LLM URL-ingest is fast but rejects long (>~2h) videos,
+yt-dlp captions hit HTTP 429 and don't exist for many live VODs, and cloud quotas run out.
+[`tools/orion-transcribe.sh`](tools/orion-transcribe.sh) is a system-agnostic orchestrator that
+**tries engines in order until one succeeds**, so you never hit a "can't transcribe" wall.
+
+**Engine order** (skip/reorder with `--engines`):
+
+1. **gemini** — optional `gemini` CLI transcription (fast; skipped if the CLI isn't installed)
+2. **ytdlp-subs** — yt-dlp auto/uploaded captions (cheap when they exist)
+3. **local-whisper** — **the sovereign floor**: yt-dlp pulls bestaudio → ffmpeg chops it into
+   `--chunk-secs` segments → `whisper` (or `mlx_whisper`) transcribes each chunk → the pieces are
+   stitched back together. It handles **any length**, needs **no captions**, and has **no rate
+   limits**. As long as you have `ffmpeg` + a whisper CLI + disk for the audio, it will finish.
+4. **transcribe-anything** — optional pip engine (insanely-fast-whisper), auto-installed on demand
+5. **aws-transcribe** — optional cloud last resort (needs `AWS_TRANSCRIBE_BUCKET` + AWS creds)
+
+Exit `0` if any engine produced a transcript; `3` if every engine failed (with a diagnosis pointing
+at the per-engine error logs).
+
+```bash
+# Transcribe a video, forcing straight to the sovereign local floor:
+tools/orion-transcribe.sh "https://youtu.be/VIDEO_ID" --engines local-whisper --model base --out out.txt
+
+# Full cascade with 5-minute chunks, ingesting into your own SQLite knowledge DB:
+tools/orion-transcribe.sh "https://youtu.be/VIDEO_ID" --chunk-secs 300 --ingest-db ./transcripts.db
+
+# A local file, and a batch from a URL list:
+tools/orion-transcribe.sh --local ./lecture.mp4 --out lecture.txt
+tools/orion-transcribe.sh --file urls.txt
+```
+
+**Requires** `yt-dlp`, `ffmpeg`/`ffprobe`, and one of `whisper` (`pip install openai-whisper`) or
+`mlx_whisper` (`pip install mlx-whisper`, Apple Silicon). The local-whisper technique and the
+engine-variety approach draw on the open-source projects
+[transcribe-anything](https://github.com/zackees/transcribe-anything),
+[buzz](https://github.com/chidiwilliams/buzz),
+[vibe](https://github.com/thewh1teagle/vibe),
+[AI-Video-Transcriber](https://github.com/wendy7756/AI-Video-Transcriber),
+long-video-transcripts, and
+[aws-video-transcriber](https://github.com/awslabs/aws-video-transcriber).
+
 ## Documentation
 
 | Doc | Read it for |
