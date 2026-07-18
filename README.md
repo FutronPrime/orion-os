@@ -89,6 +89,55 @@ engine-variety approach draw on the open-source projects
 long-video-transcripts, and
 [aws-video-transcriber](https://github.com/awslabs/aws-video-transcriber).
 
+## Skill search — find, vet, and mount skills on demand
+
+No orchestrator ships with every skill it will ever need.
+[`tools/orion-skill-search.sh`](tools/orion-skill-search.sh) lets ORION reach the open internet on
+demand: it **searches public repos**, runs every candidate through a **mandatory security gate**,
+quarantines what it downloads, and registers only what passes — so a skill ORION never had installed
+can be discovered and made available at runtime. **Discovery and trust are separate steps, and
+nothing is ever auto-executed.**
+
+The flow is **search → vet → register**:
+
+1. **Search** — `gh search repos` across all of GitHub is the primary discovery path, backed by a
+   scan of curated public awesome-lists (VoltAgent/awesome-agent-skills, SciPhi-AI/agent-search,
+   kevinWangSheng/skill-search, netresearch/file-search-skill, assafelovic/gpt-researcher,
+   karpathy/autoresearch). `gh search code` for `SKILL.md` is included but **best-effort only** —
+   GitHub's code-search API returns empty for many tokens, so it stays quiet when it finds nothing
+   and is never treated as authoritative. Search **installs nothing**; it just lists candidates.
+2. **Vet** — `--vet <owner/repo>` shallow-clones the candidate into a quarantine dir (never the live
+   skills tree, never executed) and runs the **mandatory security gate**:
+   - **Static malware scan** — flags `curl|bash` / `wget|sh` pipes, `rm -rf ~`, `base64 -d | sh`,
+     `eval $(curl …)`, reverse shells (`nc -e`, `/dev/tcp/`), credential/secret exfiltration,
+     embedded private keys, and oversized/opaque binaries.
+   - **Reputation check** — repo age, stars, and fork signals via the GitHub CLI (non-fatal if `gh`
+     is absent).
+   - **Optional external audit hook** — point `SKILL_AUDIT_CMD` at your own auditor and its output
+     is appended as an advisory note. A candidate that fails the static scan is **rejected**.
+3. **Register** — `--register <id>` promotes a candidate **only if it passed vetting**, recording it
+   in an index so an orchestrator/broker becomes aware of it. Registration is **index-only** — it
+   still never runs the code; you mount the skill when you actually need it.
+
+```bash
+# 1. Discover candidates (installs nothing):
+tools/orion-skill-search.sh "pdf table extraction" --limit 10
+
+# 2. Vet a specific candidate — clones to quarantine + runs the security gate:
+tools/orion-skill-search.sh --vet someowner/some-skill-repo
+
+# 3. Register ONLY if vetting passed (index-only; never auto-executes):
+tools/orion-skill-search.sh --register someowner__some-skill-repo
+
+# List configured discovery sources:
+tools/orion-skill-search.sh --sources
+```
+
+**Requires** `gh` (the GitHub CLI) for live search; without it the tool degrades to printing the
+curated sources plus a web-search hint. The quarantine location defaults to
+`$HOME/.orion/skills-quarantine` and is overridable with `SKILL_QUARANTINE_DIR`. **By design, ORION
+never auto-executes unvetted code** — the gate is a forcing function, not a suggestion.
+
 ## Documentation
 
 | Doc | Read it for |
