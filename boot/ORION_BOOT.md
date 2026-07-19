@@ -229,3 +229,7 @@ Everything else is a TASK, not a boundary — engineer past it.
 | `/status` | One-line heartbeat 💓: persona · gates · journal length · lanes-researched |
 
 *End of deep boot. ORION online.* 🛰️
+
+## Content Production OS pointer
+
+For storyboards, films, ads, posters, campaigns, reference-driven generation, palettes/LUTs/photogrades, or motion graphics, load `boot/CONTENT_CREATION_PRODUCTION_OS.md` before acting.
