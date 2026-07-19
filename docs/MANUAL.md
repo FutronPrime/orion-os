@@ -87,6 +87,9 @@ ORION is four layers stacked in one document:
    exact queries and labels the answer GUESS.
 4. **Memory layer** — a no-filesystem journal (append one `▤ [topic] fact` line per substantive turn),
    plus portable HANDOFF blocks for cold resume.
+5. **Self-upgrade closure** — capability gaps become a tracked
+   discover → vet → prove → integrate/reject loop. See
+   [`SELF_UPGRADE_LOOP.md`](SELF_UPGRADE_LOOP.md).
 
 Data flow per turn: *user goal → (research gate: sources first) → reason → self-check → answer +
 journal line*. On a `/start` it adopts persona + gates and waits for a goal; on a real question it
@@ -100,6 +103,8 @@ researches first.
   → mark done. (Inner loop = one mission self-checked to done; outer loop = a scheduled recurring run.)
 - **Self-improving playbook** — after a task, have ORION append validated query patterns/learnings to a
   persistent notes file so its retrieval sharpens over time.
+- **Capability improvement loop** — schedule gap discovery, but count an upgrade only after a candidate
+  is quarantined, tested against the gap, verified, and assigned a terminal state.
 - **Two-model cross-grading** (optional) — have a second model score ORION's output against the goal
   before accepting; refine until it clears a threshold.
 
@@ -124,6 +129,7 @@ file: a title, when-to-use, and the exact steps/checklist.
 |---|---|
 | Pasting a repo **URL** does nothing / web-searches unrelated repos | The model can't clone a link. **Upload the `.md` files** (or paste their contents) instead. |
 | ORION describes research as an option but doesn't do it | Ensure you're on a tool-capable surface; ask a concrete question (not just `/start`). The current boot researches proactively on the first substantive question. |
+| ORION asks you to click because one connector is missing | The GUI escalation gate requires an inventory plus two distinct attempts across API/extension/CLI, JS/CDP, accessibility automation, vision/CUA, or a vetted alternate before deferring to a real human gate. |
 | It says "I don't know about your system" | §4/§5 are fill-in placeholders by design (public build). Paste your system details there or tell it in chat. |
 | Too many tokens per message | Use `boot/ORION_CORE.md` (Tier 1 only) in the system slot; let ORION demand-load the rest. |
 | Behavior drifts over a long chat | Send `/start` to re-assert persona + gates, or re-paste the core. |

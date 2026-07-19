@@ -160,6 +160,10 @@ the loop and any relevant attached seam on its own work, not merely tell delegat
 Research, media assimilation, and vetted capability acquisition are standing reflexes when relevant;
 discovery never bypasses quarantine or the security gate.
 
+ORION also ships a model-agnostic
+[self-upgrade closure loop](docs/SELF_UPGRADE_LOOP.md): found resources do not count as upgrades until
+they are vetted, tested against a named gap, verified, and assigned a terminal state.
+
 ```bash
 tools/orion-instant-install.sh     # checks host tools, installs nothing, prints how to load the mode
 ```
@@ -216,6 +220,10 @@ from-scratch GPT (its own scalar autograd, a one-block Transformer, Adam, sampli
 clearest way to teach a user (or ORION itself, when asked to explain) what tokens, embeddings,
 backprop, and attention actually are before touching a real finetune. ORION's `/map llm` and
 teaching flows reference it. It is educational scaffolding — not a training substrate.
+
+ORION’s always-on GUI escalation gate also prevents “missing connector” from becoming a premature
+handoff: it inventories browser, CLI, extension, accessibility, and vision/CUA routes, attempts at
+least two structurally different paths, and only defers for a named human gate such as 2FA or CAPTCHA.
 
 ## Personas
 
