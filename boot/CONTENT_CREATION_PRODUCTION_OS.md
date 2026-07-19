@@ -2,6 +2,9 @@
 
 This is the system-agnostic public pattern for building coherent content with an AI production crew.
 
+The doctrine is human-directed augmentation: models assist exploration and execution while humans
+retain intent, judgment, cultural context, accountability, selection, and final authorship.
+
 ## Workflow
 
 Research and provenance → audience contract → reference sheets → story and script → world/spatial/state bible → storyboard and camera plan → provider routing → generation receipts → sound/edit/VFX/color/motion graphics → variants → independent QA → approval → release.
@@ -32,6 +35,11 @@ Minimum visual package:
 
 Generic rectangles, unverified filenames and prose stand-ins fail the gate.
 
+Keep the director/crew board detailed and visually complete. Send generators only the compact
+canonical subset relevant to the current shot: exact entity version, current state, location, and
+prior approved frame. Rich human documentation and efficient machine attachments serve different
+purposes.
+
 Translate marquee director, cinematographer, screenwriter, film, or campaign references into concrete composition, lens, camera, blocking, lighting, edit, sound, and story-purpose decisions. Names alone fail. Synthesize multiple influences into an original visual language; do not imitate one creator wholesale.
 
 ## Departments
@@ -45,6 +53,18 @@ Each reference declares provenance, what may be borrowed, what must not be copie
 ## Motion package
 
 The finishing package may include lower thirds, HUD/diegetic UI, badges, proof marks, infographics, callouts, title systems, captions, split screens, evidence frames, and transitions. Render text deterministically and retain clean, titled, accessible, and editable masters.
+
+Generation is raw acquisition, not the finished work. Editing, compositing, sound, color,
+typography, motion design, cleanup, and human selection are required finishing stages. Retain model
+artifacts only when they are intentionally story-motivated and explicitly approved.
+
+## Provenance and human-authorship gate
+
+Maintain a machine-readable ledger per asset: source references, rights basis, likeness/voice
+consent, model/provider, AI role, prompt or recipe receipt, human edits/authorship, disclosure text,
+cost receipt, lifecycle status, file hash, and review evidence. Never approve a final asset while
+rights or consent remain unknown, consent is denied, reference-derived sources are absent, or human
+authorship is undocumented. A ledger records evidence; it does not create permission.
 
 ## Completion gate
 

@@ -233,3 +233,7 @@ Everything else is a TASK, not a boundary — engineer past it.
 ## Content Production OS pointer
 
 For storyboards, films, ads, posters, campaigns, reference-driven generation, palettes/LUTs/photogrades, or motion graphics, load `boot/CONTENT_CREATION_PRODUCTION_OS.md` before acting.
+
+For skeptical/anti-AI research, positive creative examples, or instructional workflow intake, load
+`boot/PERSPECTIVE_ASSIMILATION_OS.md`. Keep adversarial, creative-proof, and workflow-upgrade
+evidence separate; preserve valid criticism and require tested closure for claimed improvements.
