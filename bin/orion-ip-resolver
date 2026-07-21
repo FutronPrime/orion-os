@@ -1,0 +1,125 @@
+#!/usr/bin/env python3
+"""orion-ip-resolver — automated IP-issue resolver for any stack.
+Detects when our egress IP is blocked/flagged and routes around it via a strategy ladder.
+Built from a curated IP-resilience resource set (see docs/ip-resilience.md).
+
+Commands:
+  check                 report our public IP + reputation (getIPIntel) + ASN (ipapi)
+  strategies            list bypass lanes and their live availability
+  fetch <url>           GET a URL through the ladder: direct -> proxy(env) -> tor -> report
+  tor-rotate            request a fresh Tor exit IP (NEWNYM) if a control port is available
+  yt-transcript <url>   YouTube transcript via Apify server-side (immune to our IP block)
+
+Importable: from futron_ip_resolver import fetch, yt_transcript  (other tools reuse the ladder).
+"""
+import sys, os, json, socket, urllib.request, urllib.error, subprocess
+
+CONTACT = os.environ.get("GETIPINTEL_CONTACT","you@example.com")  # getIPIntel requires a contact
+STATE = os.path.expanduser("~/.orion/ip-resolver-lastgood.json"); os.makedirs(os.path.dirname(STATE),exist_ok=True)
+
+def _get(url, proxy=None, timeout=20):
+    op = urllib.request.build_opener()
+    if proxy:
+        op = urllib.request.build_opener(urllib.request.ProxyHandler({"http":proxy,"https":proxy}))
+    return op.open(urllib.request.Request(url, headers={"User-Agent":"Mozilla/5.0"}), timeout=timeout).read()
+
+def public_ip(proxy=None):
+    try: return _get("https://api.ipify.org", proxy).decode().strip()
+    except Exception: return None
+
+def reputation(ip):
+    # getIPIntel: 0=clean .. 1=proxy/bad (blackdotsh/getIPIntel)
+    try:
+        v = _get(f"http://check.getipintel.net/check.php?ip={ip}&contact={CONTACT}").decode().strip()
+        return float(v)
+    except Exception: return None
+
+def asn(ip):
+    try: return json.loads(_get(f"https://ipapi.co/{ip}/json/").decode())
+    except Exception: return {}
+
+def tor_proxy():
+    # detect a working Tor SOCKS (naborajs/Termux-Tor-IP-Rotator pattern)
+    for port in (9050, 9150):
+        try:
+            s = socket.create_connection(("127.0.0.1", port), timeout=2); s.close()
+            p = f"socks5h://127.0.0.1:{port}"
+            if public_ip(p): return p           # only if it actually exits
+        except Exception: continue
+    return None
+
+def env_proxy():
+    return os.environ.get("HTTPS_PROXY") or os.environ.get("https_proxy") or \
+           os.environ.get("ALL_PROXY") or None
+
+def tor_rotate():
+    try:
+        from stem import Signal; from stem.control import Controller
+        with Controller.from_port(port=9051) as c:
+            c.authenticate(); c.signal(Signal.NEWNYM)
+        return "rotated (NEWNYM sent)"
+    except Exception as e:
+        return f"unavailable: {e} (install: tor + stem; enable ControlPort 9051)"
+
+def strategies():
+    out=[("direct", public_ip() or "BLOCKED/offline")]
+    ep=env_proxy(); out.append(("env-proxy", ep or "none set (HTTPS_PROXY)"))
+    tp=tor_proxy(); out.append(("tor", tp or "no working exit on :9050/:9150"))
+    out.append(("server-side/Apify", "yt-transcript lane (adopted)"))
+    out.append(("SNI-spoof / MASQUE", "documented lane — see ip-resilience-resources.md"))
+    return out
+
+def fetch(url):
+    """Try the ladder; return (content_bytes, method)."""
+    for name, prox in [("direct", None), ("env-proxy", env_proxy()), ("tor", tor_proxy())]:
+        if name != "direct" and not prox: continue
+        try:
+            data = _get(url, prox, timeout=30)
+            json.dump({"url":url,"method":name}, open(STATE,"w"))
+            return data, name
+        except Exception:
+            continue
+    raise RuntimeError("all lanes failed (direct/proxy/tor) — add a proxy or use a server-side actor")
+
+def yt_transcript(url):
+    """YouTube transcript via Apify server-side actors (their IP, not ours)."""
+    tok=os.environ.get("APIFY_API_TOKEN")
+    if not tok: raise RuntimeError("no APIFY_API_TOKEN")
+    for actor in ["pintostudio~youtube-transcript-scraper","karamelo~youtube-transcripts",
+                  "topaz_sharingan~Youtube-Transcript-Scraper-1"]:
+        try:
+            body=json.dumps({"videoUrl":url,"urls":[url],"startUrls":[{"url":url}]}).encode()
+            d=json.loads(_get(f"https://api.apify.com/v2/acts/{actor}/run-sync-get-dataset-items?token={tok}",
+                              timeout=110) if False else
+                         urllib.request.urlopen(urllib.request.Request(
+                             f"https://api.apify.com/v2/acts/{actor}/run-sync-get-dataset-items?token={tok}",
+                             data=body, headers={"Content-Type":"application/json"}), timeout=110).read())
+            if d:
+                row=d[0]
+                if isinstance(row.get("data"),list): return " ".join(s.get("text","") for s in row["data"])
+                if isinstance(row.get("captions"),list): return " ".join(row["captions"])
+                return row.get("text") or row.get("transcript") or ""
+        except Exception: continue
+    raise RuntimeError("all Apify actors failed")
+
+def main():
+    cmd = sys.argv[1] if len(sys.argv)>1 else "check"
+    if cmd=="check":
+        ip=public_ip(); print("public IP:", ip)
+        if ip:
+            r=reputation(ip); a=asn(ip)
+            print("reputation (0=clean..1=bad):", r if r is not None else "n/a")
+            print("ASN/org:", a.get("org","?"), "|", a.get("country_name","?"))
+            if r is not None and r>0.9: print("⚠ IP flagged — prefer server-side/Apify or a proxy lane")
+    elif cmd=="strategies":
+        for n,v in strategies(): print(f"  {n:20} {v}")
+    elif cmd=="fetch" and len(sys.argv)>2:
+        data,m=fetch(sys.argv[2]); print(f"OK via {m}: {len(data)} bytes")
+    elif cmd=="tor-rotate":
+        print(tor_rotate())
+    elif cmd=="yt-transcript" and len(sys.argv)>2:
+        t=yt_transcript(sys.argv[2]); print(t[:500])
+    else:
+        print(__doc__)
+
+if __name__=="__main__": main()
